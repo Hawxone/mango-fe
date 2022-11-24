@@ -62,7 +62,7 @@ const Index = ({username,token}) => {
     const mangaList = useSelector(state => state.mangaList);
 
 
-    const getRequestParams = (page, pageSize,column,direction) => {
+    const getRequestParams = (page, pageSize,column,direction,query) => {
         let params = {};
 
         if (page) {
@@ -77,16 +77,22 @@ const Index = ({username,token}) => {
             params["sort"] = column+","+direction;
         }
 
+        if (query) {
+            params["query"] = query;
+        }
+
         return params;
     };
 
     useEffect(() => {
         if (page){
-        const params = getRequestParams(page,pageSize,filter.column,filter.direction)
-            dispatch(getPaginatedMangaListByUser({params,token}))
+        const params = getRequestParams(page,pageSize,filter.column,filter.direction,filter.query)
+                dispatch(getPaginatedMangaListByUser({params,token}))
+
+
         }else {
-            const params = getRequestParams(0,pageSize,filter.column,filter.direction)
-            dispatch(getPaginatedMangaListByUser({params,token}))
+            const params = getRequestParams(0,pageSize,filter.column,filter.direction,filter.query)
+                dispatch(getPaginatedMangaListByUser({params,token}))
         }
 
     }, [dispatch, filter, page, token]);
