@@ -36,7 +36,6 @@ export async function getServerSideProps(context) {
             }
         }
     }
-
 }
 
 const TagResult = ({mangaListSSR,username,pageSize}) => {
