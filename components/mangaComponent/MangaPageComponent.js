@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useRouter} from "next/router";
 import Link from "next/link";
-import {useDispatch, useSelector} from "react-redux";
+import {useDispatch} from "react-redux";
 import mangaService from "../../services/MangaService";
 import {putMangaUser} from "../../public/src/features/MangaUserSlice";
 import {
@@ -11,6 +11,8 @@ import {
     ChevronLeftIcon,
     ChevronRightIcon
 } from "@heroicons/react/20/solid";
+import AboutComponent from "../AboutComponent";
+import {useSession} from "next-auth/react";
 
 let images = []
 function preload (page,size,currentManga) {
@@ -29,9 +31,7 @@ function preload (page,size,currentManga) {
                 images[i].height=1200
             }
         }
-
     }else{
-
         for (let i = +page-1; i < +page+3; i++) {
 
             if ((+page-1)<0){
@@ -46,47 +46,61 @@ function preload (page,size,currentManga) {
             }
         }
     }
-
-
     return null;
 }
 
 const MangaPageComponent = () => {
+
     const router= useRouter();
-    const { userInfo } = useSelector((state) => state.users);
+    const {data} = useSession();
+
     const page = router.query.pid;
     const manga = router.query.manga;
     const dispatch = useDispatch();
 
     const [currentManga, setCurrentManga] = useState(0);
     const [pageSize, setPageSize] = useState(0);
+    const [isError, setIsError] = useState(false);
 
-    if (userInfo){
+    if (data){
         if (currentManga){
             const formData = new FormData();
             formData.append("currentPage",page.toString());
             const mangaId = currentManga;
-            const userId = userInfo.id;
-            dispatch(putMangaUser({formData,userId,mangaId}))
+            const userId = data.user.id;
+            if (+page>pageSize){
+
+            }else{
+                dispatch(putMangaUser({formData,userId,mangaId}))
+            }
+
         }
     }
 
     useEffect(() => {
-        if (userInfo){
+        if (data){
             if (router.isReady){
-                const userId = userInfo.id;
+                const userId = data.user.id;
                 const id = router.query.manga;
                 mangaService.getMangaDetailByOrderId({id, userId}).then((res)=>{
                     if (res.data.mangaUser !==null){
                         const formData = new FormData();
                         formData.append("currentPage",page.toString());
                         const mangaId = res.data.id;
-                        dispatch(putMangaUser({formData,userId,mangaId}))
+
+                        if (+page>res.data.pageCount){
+
+                        }else{
+                            dispatch(putMangaUser({formData,userId,mangaId}))
+                        }
+
                     }
                     setCurrentManga(res.data.id);
                     setPageSize(res.data.pageCount);
-                })
+
+                }).catch(()=>{setIsError(true)})
             }
+
         }else{
             if (router.isReady){
                 const userId = 0;
@@ -95,7 +109,8 @@ const MangaPageComponent = () => {
                 mangaService.getMangaDetailByOrderId({id, userId}).then((res)=>{
                     setCurrentManga(res.data.id);
                     setPageSize(res.data.pageCount);
-                })
+
+                }).catch(()=>{setIsError(true)})
             }
         }
 
@@ -120,19 +135,24 @@ const MangaPageComponent = () => {
     }
 
     function handleArrowLeft() {
-        console.log("Left");
         router.push(`/e/${manga}/${+page===1?'':+page-1}`)
     }
     function handleArrowRight() {
-        console.log("Right");
-        router.push(+router.query.pid===pageSize?window.location=`/e/${manga}`:`/e/${manga}/${+page+1}`)
+        router.push(+router.query.pid===pageSize?`/e/${manga}`:`/e/${manga}/${+page+1}`)
     }
 
     useKey('ArrowLeft',handleArrowLeft)
     useKey('ArrowRight',handleArrowRight)
 
+    if (pageSize !==0){
+        if(page>pageSize){
+            return (<AboutComponent/>)
+        }
+    }
 
     return (
+        isError===false?
+        pageSize !==0 &&
         <div id={"reader"} className={"w-full"}>
           <div className={"bg-neutral-600"}>
 
@@ -170,8 +190,6 @@ const MangaPageComponent = () => {
                                       </Link>
                                   </>
                               }
-
-
                           </>
                       }
 
@@ -204,9 +222,6 @@ const MangaPageComponent = () => {
                                       {preload(page, pageSize, currentManga)}
                                   </Link>
                           )
-
-
-
                       }
 
                   </div>
@@ -248,7 +263,6 @@ const MangaPageComponent = () => {
                                   </>
                               }
 
-
                           </>
                       }
 
@@ -259,7 +273,7 @@ const MangaPageComponent = () => {
               </div>
 
           </div>
-        </div>
+        </div>:<AboutComponent/>
     );
 };
 

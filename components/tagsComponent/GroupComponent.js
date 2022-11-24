@@ -1,42 +1,14 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {useRouter} from "next/router";
-import {useDispatch, useSelector} from "react-redux";
-import {getPaginatedGroups} from "../../public/src/features/GroupSlice";
 import {TagIcon} from "@heroicons/react/20/solid";
 import Link from "next/link";
 import TagPaginationComponent from "./TagPaginationComponent";
 
-const GroupComponent = () => {
-
+const GroupComponent = ({tagListSSR,pageSize}) => {
     const router = useRouter();
-    let groups = useSelector(state => state.groups);
-    const dispatch = useDispatch();
-    let page = router.query.page;
+
     let sourceType="Group";
     let path="/tags";
-    const pageSize=25;
-
-    const getRequestParams = (page, pageSize) => {
-        let params = {};
-
-        if (page) {
-            params["page"] = page-1;
-        }
-
-        if (pageSize) {
-            params["size"] = pageSize;
-        }
-        return params;
-    };
-
-    const retrieveGroups = ()=>{
-        const params = getRequestParams(page,pageSize);
-        dispatch(getPaginatedGroups({params}));
-    }
-
-    useEffect(
-        retrieveGroups
-        , [dispatch,page,sourceType]);
 
 
     return (
@@ -57,17 +29,16 @@ const GroupComponent = () => {
                 <Link className={`text-blue-700 mr-1 ${router.query.sourceType==="Category"?`underline`:null}`} href={{pathname:"/tags",query:{sourceType:"Category"}}}>Category</Link>
             </div>
 
-            {
-                groups.index&&
+
                 <div>
-                    Alphabet Index :   {groups.index.map((idx)=>(
+                    Alphabet Index :   {tagListSSR.index.map((idx)=>(
                     <Link key={idx.name} className={`text-blue-700 mr-1`} href={{pathname:"/tags",query:{
                             page:Math.ceil(idx.index===0?1:idx.index/pageSize),
                             sourceType:"Group"
                         }}}>{idx.name.toUpperCase()}</Link>
                 ))}
                 </div>
-            }
+
 
             <div className={"my-4"}>
                 <table className={"w-full"}>
@@ -80,7 +51,7 @@ const GroupComponent = () => {
                     </thead>
                     <tbody >
                     {
-                        groups && groups.groupList.map((group)=>(
+                        tagListSSR.tagList.map((group)=>(
                             <tr key={group.id} className={"even:bg-neutral-900 odd:bg-neutral-800"}>
                                 <td className={"px-4 py-2 border-b"}>{group.name}</td>
                                 <td className={"px-4 py-2 border-b"}>{group.mangaCount}</td>
@@ -91,16 +62,15 @@ const GroupComponent = () => {
                     </tbody>
                 </table>
 
-                {groups &&
                     <TagPaginationComponent
-                        currentPage={groups.currentPage+1}
-                        totalItems={groups.totalItems}
-                        totalPages={groups.totalPages}
+                        currentPage={tagListSSR.currentPage+1}
+                        totalItems={tagListSSR.totalItems}
+                        totalPages={tagListSSR.totalPages}
                         pageSize = {pageSize}
                         path={path}
                         sourceType={sourceType}
                     />
-                }
+
             </div>
 
         </div>

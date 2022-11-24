@@ -9,21 +9,20 @@ const initialState= {
         loading:true
 }
 
-export const getPaginatedMangaList = createAsyncThunk(
-    "manga-paginated/get",
-    async ({params,id})=>{
-            const res = await MangaService.getMangaList({params, id});
-            return res.data;
+export const getPaginatedMangaListByUser = createAsyncThunk(
+    "manga-paginated-user/get",
+    async ({params,token})=>{
+        const res = await MangaService.getMangaByUser({params,token});
+        return res.data;
     }
 )
-
 
 const MangaSlice= createSlice({
     name:"mangaList",
     initialState,
      extraReducers:(builder)=>{
         builder
-            .addCase(getPaginatedMangaList.pending,(state,action)=>{
+            .addCase(getPaginatedMangaListByUser.pending,(state,action)=>{
                 return {
                     mangaList:[],
                     currentPage:0,
@@ -32,7 +31,7 @@ const MangaSlice= createSlice({
                     loading:true
                 }
             })
-            .addCase(getPaginatedMangaList.fulfilled,(state,action)=>{
+            .addCase(getPaginatedMangaListByUser.fulfilled,(state,action)=>{
                 return {
                     mangaList:action.payload.mangaList,
                     currentPage:action.payload.currentPage,

@@ -1,46 +1,16 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {TagIcon} from "@heroicons/react/20/solid";
-import {useDispatch, useSelector} from "react-redux";
 import {useRouter} from "next/router";
-import {getPaginatedTags} from "../../public/src/features/TagSlice";
 import Link from "next/link";
 import TagPaginationComponent from "./TagPaginationComponent";
 
 
-const TagsComponent = () => {
+const TagsComponent = ({tagListSSR}) => {
     const router = useRouter()
 
-    let tags =useSelector(state=>state.tags)
-    const dispatch = useDispatch();
-
-    let page = router.query.page;
     let sourceType="Tag";
     let path="/tags";
     const pageSize=25;
-
-
-    const getRequestParams = (page, pageSize) => {
-        let params = {};
-
-        if (page) {
-            params["page"] = page-1;
-        }
-
-        if (pageSize) {
-            params["size"] = pageSize;
-        }
-
-        return params;
-    };
-
-    const retrieveTags = ()=>{
-        const params = getRequestParams(page,pageSize);
-        dispatch(getPaginatedTags({params}))
-    }
-    useEffect(
-            retrieveTags
-        ,[dispatch,page,sourceType])
-
 
     return (
         <div className={"py-8"}>
@@ -58,9 +28,9 @@ const TagsComponent = () => {
                 <Link className={`text-blue-700 mr-1 ${router.query.sourceType==="Group"?`underline`:null}`} href={{pathname:"/tags",query:{sourceType:"Group"}}}>Group</Link>
                 <Link className={`text-blue-700 mr-1 ${router.query.sourceType==="Category"?`underline`:null}`} href={{pathname:"/tags",query:{sourceType:"Category"}}}>Category</Link>
             </div>
-            {tags.index &&
+
                 <div>
-                    Alphabet Index :   {tags.index.map((idx)=>(
+                    Alphabet Index :   {tagListSSR.index.map((idx)=>(
                     <Link key={idx.name} className={`text-blue-700 mr-1`} href={{pathname:"/tags",query:{
                             page:Math.ceil(idx.index===0?1:idx.index/pageSize),
                             sourceType:"Tag"
@@ -68,7 +38,7 @@ const TagsComponent = () => {
                 ))}
 
                 </div>
-            }
+
 
             <div className={"my-4"}>
                 <table className={"w-full"}>
@@ -81,7 +51,7 @@ const TagsComponent = () => {
                     </thead>
                     <tbody >
                     {
-                        tags &&tags.tagList.map((tag)=>(
+                        tagListSSR.tagList.map((tag)=>(
                             <tr key={tag.id} className={"even:bg-neutral-900 odd:bg-neutral-800"}>
                                 <td className={"px-4 py-2 border-b"}>{tag.name}</td>
                                 <td className={"px-4 py-2 border-b"}>{tag.mangaCount}</td>
@@ -92,17 +62,16 @@ const TagsComponent = () => {
                     </tbody>
                 </table>
 
-                {tags &&
+
                     <TagPaginationComponent
-                    currentPage={tags.currentPage+1}
-                    totalItems={tags.totalItems}
-                    totalPages={tags.totalPages}
+                    currentPage={tagListSSR.currentPage+1}
+                    totalItems={tagListSSR.totalItems}
+                    totalPages={tagListSSR.totalPages}
                     pageSize = {pageSize}
                     path={path}
                     sourceType={sourceType}
                     />
 
-                }
 
             </div>
         </div>

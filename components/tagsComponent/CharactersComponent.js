@@ -1,44 +1,15 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {useRouter} from "next/router";
-import {useDispatch, useSelector} from "react-redux";
-import {getPaginatedCharacters} from "../../public/src/features/CharacterSlice";
 import {TagIcon} from "@heroicons/react/20/solid";
 import Link from "next/link";
 import TagPaginationComponent from "./TagPaginationComponent";
 
 
-const CharactersEntity = () => {
-
+const CharactersEntity = ({tagListSSR,pageSize}) => {
     const router = useRouter();
-    let characters = useSelector(state => state.characters);
-    const dispatch = useDispatch();
-    let page = router.query.page;
+
     let sourceType = "Character";
     let path="/tags";
-    const pageSize=25;
-
-    const getRequestParams = (page, pageSize) => {
-        let params = {};
-
-        if (page) {
-            params["page"] = page-1;
-        }
-
-        if (pageSize) {
-            params["size"] = pageSize;
-        }
-        return params;
-    };
-
-    const retrieveCharacters = ()=>{
-        const params = getRequestParams(page,pageSize);
-        dispatch(getPaginatedCharacters({params}));
-    }
-
-    useEffect(
-        retrieveCharacters
-    , [dispatch,page,sourceType]);
-
 
     return (
         <div className={"py-8"}>
@@ -57,17 +28,17 @@ const CharactersEntity = () => {
                 <Link className={`text-blue-700 mr-1 ${router.query.sourceType==="Group"?`underline`:null}`} href={{pathname:"/tags",query:{sourceType:"Group"}}}>Group</Link>
                 <Link className={`text-blue-700 mr-1 ${router.query.sourceType==="Category"?`underline`:null}`} href={{pathname:"/tags",query:{sourceType:"Category"}}}>Category</Link>
             </div>
-            {
-                characters.index&&
+
+
                 <div>
-                    Alphabet Index :   {characters.index.map((idx)=>(
+                    Alphabet Index :   {tagListSSR.index.map((idx)=>(
                     <Link key={idx.name} className={`text-blue-700 mr-1`} href={{pathname:"/tags",query:{
                             page:Math.ceil(idx.index===0?1:idx.index/pageSize),
                             sourceType:"Character"
                         }}}>{idx.name.toUpperCase()}</Link>
                 ))}
                 </div>
-            }
+
             <div className={"my-4"}>
                 <table className={"w-full"}>
                     <thead className={"bg-neutral-900 text-left px-4"}>
@@ -79,7 +50,7 @@ const CharactersEntity = () => {
                     </thead>
                     <tbody >
                     {
-                        characters && characters.characterList.map((character)=>(
+                        tagListSSR.tagList.map((character)=>(
                             <tr key={character.id} className={"even:bg-neutral-900 odd:bg-neutral-800"}>
                                 <td className={"px-4 py-2 border-b"}>{character.name}</td>
                                 <td className={"px-4 py-2 border-b"}>{character.mangaCount}</td>
@@ -90,16 +61,14 @@ const CharactersEntity = () => {
                     </tbody>
                 </table>
 
-                {characters &&
                     <TagPaginationComponent
-                        currentPage={characters.currentPage+1}
-                        totalItems={characters.totalItems}
-                        totalPages={characters.totalPages}
+                        currentPage={tagListSSR.currentPage+1}
+                        totalItems={tagListSSR.totalItems}
+                        totalPages={tagListSSR.totalPages}
                         pageSize = {pageSize}
                         path={path}
                         sourceType={sourceType}
                     />
-                }
 
             </div>
 

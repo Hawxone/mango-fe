@@ -1,44 +1,14 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {useRouter} from "next/router";
-import {useDispatch, useSelector} from "react-redux";
-import {getPaginatedCategories} from "../../public/src/features/CategorySlice";
 import {TagIcon} from "@heroicons/react/20/solid";
 import Link from "next/link";
 import TagPaginationComponent from "./TagPaginationComponent";
 
-const CategoryComponent = () => {
+const CategoryComponent = ({tagListSSR,pageSize}) => {
 
     const router = useRouter();
-    let categories = useSelector(state => state.categories);
-    const dispatch = useDispatch();
-    let page = router.query.page;
     let sourceType="Category";
     let path="/tags";
-    const pageSize=25;
-
-    const getRequestParams = (page, pageSize) => {
-        let params = {};
-
-        if (page) {
-            params["page"] = page-1;
-        }
-
-        if (pageSize) {
-            params["size"] = pageSize;
-        }
-        return params;
-    };
-
-    const retrieveCategories = ()=>{
-        const params = getRequestParams(page,pageSize);
-        dispatch(getPaginatedCategories({params}));
-    }
-
-    useEffect(
-
-        retrieveCategories
-        , [dispatch,page,sourceType]);
-
 
     return (
         <div className={"py-8"}>
@@ -58,9 +28,9 @@ const CategoryComponent = () => {
                 <Link className={`text-blue-700 mr-1 ${router.query.sourceType==="Category"?`underline`:null}`} href={{pathname:"/tags",query:{sourceType:"Category"}}}>Category</Link>
             </div>
 
-            {
-                categories.index&&<div>
-                    Alphabet Index :   {categories.index.map((idx)=>(
+
+                <div>
+                    Alphabet Index :   {tagListSSR.index.map((idx)=>(
                     <Link key={idx.name} className={`text-blue-700 mr-1`} href={{pathname:"/tags",query:{
                             page:Math.ceil(idx.index===0?1:idx.index/pageSize),
                             sourceType:"Artist"
@@ -68,7 +38,7 @@ const CategoryComponent = () => {
                 ))}
 
                 </div>
-            }
+
 
             <div className={"my-4"}>
                 <table className={"w-full"}>
@@ -81,7 +51,7 @@ const CategoryComponent = () => {
                     </thead>
                     <tbody >
                     {
-                        categories && categories.categoryList.map((category)=>(
+                        tagListSSR.tagList.map((category)=>(
                             <tr key={category.id} className={"even:bg-neutral-900 odd:bg-neutral-800"}>
                                 <td className={"px-4 py-2 border-b"}>{category.name}</td>
                                 <td className={"px-4 py-2 border-b"}>{category.mangaCount}</td>
@@ -92,17 +62,17 @@ const CategoryComponent = () => {
                     </tbody>
                 </table>
 
-                {categories &&
+
                     <TagPaginationComponent
-                        currentPage={categories.currentPage+1}
-                        totalItems={categories.totalItems}
-                        totalPages={categories.totalPages}
+                        currentPage={tagListSSR.currentPage+1}
+                        totalItems={tagListSSR.totalItems}
+                        totalPages={tagListSSR.totalPages}
                         pageSize = {pageSize}
                         path={path}
                         sourceType={sourceType}
                     />
 
-                }
+
 
             </div>
         </div>

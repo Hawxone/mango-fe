@@ -4,17 +4,25 @@ import { LockClosedIcon } from '@heroicons/react/20/solid'
 import {useRouter} from "next/router";
 import {userLogin} from "../../public/src/features/UserSlice";
 import {registerUser} from "../../public/src/features/UserSlice";
-
-
+import {signIn} from "next-auth/react";
 
 
 const AuthComponent = () => {
-    const { userInfo, accessToken } = useSelector((state) => state.users)
-    const router = useRouter();
-    useEffect(() => {
-        if(userInfo) router.push("/").then(()=>window.location.reload())
-    }, [router, userInfo]);
 
+    const router = useRouter();
+
+    const handleLogin = async (e)=>{
+        e.preventDefault()
+        let username = userState.username;
+        let password = userState.password;
+
+        const res = signIn('credentials',
+            {
+                username,
+                password,
+                callbackUrl:`/`
+            })
+    }
 
     const dispatch = useDispatch()
 
@@ -34,20 +42,7 @@ const AuthComponent = () => {
         setUserState({ ...userState, [id]: value });
     };
 
-    const login = async (event)=>{
-        event.preventDefault()
-        let username = userState.username;
-        let password = userState.password;
-        dispatch(userLogin({username,password}))
-            .unwrap()
-            .then((response)=>{
-                router.push("/")
-            })
-            .catch((error)=>{
-                console.log(error)
-            })
 
-    }
 
     const register = async (event)=>{
         event.preventDefault()
@@ -57,7 +52,7 @@ const AuthComponent = () => {
         let email = userState.email;
 
         if (password !== passwordConfirmation){
-            console.log("password mismatch")
+
         }else{
             dispatch(registerUser({username,email,password}))
                 .unwrap()
@@ -94,7 +89,7 @@ const AuthComponent = () => {
                         }
 
                     </div>
-                    <form className="mt-8 space-y-6" onSubmit={router.query.option?router.query.option==="login"?login:register:null} method="POST">
+                    <form className="mt-8 space-y-6" onSubmit={router.query.option?router.query.option==="login"?handleLogin:register:null} method="POST">
                         <input type="hidden" name="remember" defaultValue="true" />
                         {router.query.option?
 

@@ -3,14 +3,12 @@ import {UsePagination} from "../paginatorComponent/UsePagination";
 import Link from "next/link";
 import {ChevronLeftIcon, ChevronRightIcon} from "@heroicons/react/20/solid";
 
-const MangaTagPaginationComponent = ({currentPage,totalItems,totalPages,path,pageSize,tagName,tagType}) => {
-
+const UserUploadPaginationComponent = ({currentPage,totalItems,totalPages,path,pageSize}) => {
 
     const siblingCount = 3;
     let startIndex = ((currentPage-1)*pageSize)+1
     let endIndex = (currentPage)*pageSize
     let totalCount=totalItems;
-
 
     if (startIndex===totalItems){
         endIndex=totalItems
@@ -82,4 +80,4 @@ const MangaTagPaginationComponent = ({currentPage,totalItems,totalPages,path,pag
     );
 };
 
-export default MangaTagPaginationComponent;
+export default UserUploadPaginationComponent;

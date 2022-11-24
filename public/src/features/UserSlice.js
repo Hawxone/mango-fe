@@ -120,7 +120,7 @@ const userSlice =createSlice({
     }
 })
 
-export const {logout}  = userSlice.actions;
+
 const {reducer} = userSlice;
 export default reducer;
 

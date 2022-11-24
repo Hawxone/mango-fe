@@ -17,8 +17,17 @@ const getMangaByTag = ({params,id})=> {
     return http.get(`/manga/tag?userId=${id}`, {params})
 }
 
+const getMangaByUser = ({params,token})=>{
+    return http.get(`http://localhost:8080/api/v1/manga/user`,{
+        headers:{
+            Authorization:"Bearer "+token
+        },
+        params
+    })
+}
+
 const mangaService = {
-    getMangaList,getMangaDetailByOrderId,searchManga,getMangaByTag
+    getMangaList,getMangaDetailByOrderId,searchManga,getMangaByTag,getMangaByUser
 }
 
 export default mangaService;

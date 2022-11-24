@@ -3,9 +3,43 @@ import Dashboard from "../components/Dashboard";
 import Header from "../components/Header";
 import {useRouter} from "next/router";
 import React from "react";
+import {getToken} from "next-auth/jwt";
+
+export async function getServerSideProps(context) {
+
+    const secret = 'sdfkjhsdf92w5y29whg9240p34909yh09v0324703hn09eu2019';
+    const token = await getToken({
+        req: context.req,
+        secret: secret
+    });
+
+    const userId = token?token.id:0;
+
+    const pageSize = 25;
+    const currentPage = context.query.page?context.query.page:1;
 
 
-export default function Home() {
+    const response = await fetch(`http://localhost:8080/api/v1/manga?userId=${userId}&page=${+currentPage-1}&size=${pageSize}`);
+    const mangaListSSR = await response.json();
+    if (!mangaListSSR.mangaList.length){
+        return {
+            notFound: true,
+        }
+    }else{
+        return {
+            props: {
+                mangaListSSR:mangaListSSR,
+                username:token?token.username:null,
+                pageSize:pageSize,
+                auth:token
+            }
+        }
+    }
+
+}
+
+
+const Home=({username,mangaListSSR,pageSize,auth})=> {
 
     const router = useRouter();
   return (
@@ -16,9 +50,9 @@ export default function Home() {
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-        <Header />
+        <Header user={username} />
       <main>
-        <Dashboard />
+        <Dashboard mangaListSSR={mangaListSSR} pageSize={pageSize} />
       </main>
 
       <footer>
@@ -26,3 +60,5 @@ export default function Home() {
     </div>
   )
 }
+
+export default Home;

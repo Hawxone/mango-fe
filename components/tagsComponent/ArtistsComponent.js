@@ -1,41 +1,16 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {TagIcon} from "@heroicons/react/20/solid";
 import Link from "next/link";
 import {useRouter} from "next/router";
-import {useDispatch, useSelector} from "react-redux";
-import {getPaginatedArtists} from "../../public/src/features/ArtistSlice";
 import TagPaginationComponent from "./TagPaginationComponent";
 
 
-const ArtistsComponent = () => {
+const ArtistsComponent = ({tagListSSR,pageSize}) => {
+
     const router = useRouter();
-    let artists = useSelector(state => state.artists);
-    const dispatch = useDispatch();
-    let page = router.query.page;
     let sourceType="Artist";
     let path="/tags";
-    const pageSize=25;
 
-    const getRequestParams = (page, pageSize) => {
-        let params = {};
-
-        if (page) {
-            params["page"] = page-1;
-        }
-
-        if (pageSize) {
-            params["size"] = pageSize;
-        }
-        return params;
-    };
-
-    const retrieveArtist = ()=>{
-        const params = getRequestParams(page,pageSize);
-        dispatch(getPaginatedArtists({params}))
-    }
-    useEffect(
-        retrieveArtist
-        ,[dispatch,page,sourceType])
 
     return (
         <div className={"py-8"}>
@@ -54,8 +29,8 @@ const ArtistsComponent = () => {
                 <Link className={`text-blue-700 mr-1 ${router.query.sourceType==="Category"?`underline`:null}`} href={{pathname:"/tags",query:{sourceType:"Category"}}}>Category</Link>
             </div>
             {
-                artists.index&&<div>
-                    Alphabet Index :   {artists.index.map((idx)=>(
+               <div>
+                    Alphabet Index :   {tagListSSR.index.map((idx)=>(
                     <Link key={idx.name} className={`text-blue-700 mr-1`} href={{pathname:"/tags",query:{
                             page:Math.ceil(idx.index===0?1:idx.index/pageSize),
                             sourceType:"Artist"
@@ -77,7 +52,7 @@ const ArtistsComponent = () => {
                     </thead>
                     <tbody >
                     {
-                        artists && artists.artistList.map((artist)=>(
+                        tagListSSR.tagList.map((artist)=>(
                             <tr key={artist.id} className={"even:bg-neutral-900 odd:bg-neutral-800"}>
                                 <td className={"px-4 py-2 border-b"}>{artist.name}</td>
                                 <td className={"px-4 py-2 border-b"}>{artist.mangaCount}</td>
@@ -88,17 +63,15 @@ const ArtistsComponent = () => {
                     </tbody>
                 </table>
 
-                {artists &&
+
                     <TagPaginationComponent
-                        currentPage={artists.currentPage+1}
-                        totalItems={artists.totalItems}
-                        totalPages={artists.totalPages}
+                        currentPage={tagListSSR.currentPage+1}
+                        totalItems={tagListSSR.totalItems}
+                        totalPages={tagListSSR.totalPages}
                         pageSize = {pageSize}
                         path={path}
                         sourceType={sourceType}
                     />
-
-                }
 
             </div>
 
